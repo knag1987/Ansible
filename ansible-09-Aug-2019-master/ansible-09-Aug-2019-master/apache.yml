@@ -1,0 +1,40 @@
+---
+
+- hosts: webservers
+  become: True
+  vars:
+    - apache_port: 80
+  tasks:
+    - name: Install required packages
+      yum:
+        name: "{{item}}"
+        state: present
+      loop:
+        - httpd
+        - git
+    - name: Enable apache
+      service:
+        name: httpd
+        enabled: True
+    - name: Install static website
+      git:
+        repo: https://github.com/javahometech/javahome-app
+        dest: /var/www/html
+    - name: start apache
+      service:
+        name: httpd
+        state: started
+    - name: Ensure the default Apache port is 8080
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^Listen '
+        insertafter: '^#Listen '
+        line: Listen "{{apache_port}}"
+      notify:
+        - Restart Apache
+  handlers:    
+    - name: Restart Apache
+      service:
+        name: httpd
+        state: restarted
+...

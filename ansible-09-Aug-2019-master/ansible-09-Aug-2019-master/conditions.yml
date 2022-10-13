@@ -1,0 +1,15 @@
+---
+- hosts: all
+  become: True
+  gather_facts: False
+  tasks:
+    - name: Install packages
+      yum:
+        name: "{{item}}"
+        state: present
+      loop:
+        - httpd
+        - git
+      when: 
+        - ansible_os_family=="RedHat"
+...
